@@ -1,0 +1,33 @@
+from bs4 import BeautifulSoup
+import requests
+import pymongo
+
+
+
+header={
+
+'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.99 Safari/537.36'
+}
+for i in range(10):
+    q = i*10
+    url ='http://maoyan.com/board/4?offset=%s'%q
+    response = requests.get(url,headers=header).text
+    soup = BeautifulSoup(response,'lxml')
+    results = soup.select('.main .board-wrapper dd')
+    for result in results:
+        a = result.select('.star')[0].text
+        item={
+            'name':result.select('.name a')[0].text,
+            'star':result.select('.star')[0].text.replace('：', ',').replace('\n','').replace(' ','').split(',')[1:],
+            #'star':' '.join(a).replace(',','').split()[3:],
+            'releasetime':result.select('.releasetime')[0].text[5:],
+            'score':result.select('.score i')[0].string+result.select('.score i')[1].string
+
+        }
+        client = pymongo.MongoClient(host='127.0.0.1', port=27017)
+        db = client['test']
+        p = db['persons']
+        res = p.insert(item)
+        print(res)
+
+
