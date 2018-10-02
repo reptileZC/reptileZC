@@ -1,0 +1,81 @@
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+import re
+from bs4 import BeautifulSoup
+import pymongo
+from selenium.common.exceptions import TimeoutException
+
+MONGO_URL='localhost'
+MONGO_DB='联想笔记本'
+
+KEYWORD='联想笔记本'
+browser = webdriver.Chrome()
+wait = WebDriverWait(browser,10)
+
+client=pymongo.MongoClient(MONGO_URL)
+db=client[MONGO_DB]
+
+def save_to_mongo(info):
+    if db[KEYWORD].insert(info):
+        print('保存成功',info)
+    else:
+        print('失败',info)
+
+
+def get_search():
+    url = 'https://www.taobao.com'
+    browser.get(url)
+    try:
+        inputs = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR,'#q')))
+        button = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR,'#J_TSearchForm > div.search-button > button')))
+        inputs.send_keys(KEYWORD)
+        button.click()
+        page=wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, '#mainsrp-pager > div > div > div > div.total'))).text.strip()
+        page = re.search('\d+',page).group()
+        get_information(browser.page_source)
+        return int(page)
+    except TimeoutException:
+        print('get_search()出现TimeoutException')
+        return get_search()
+
+def get_information(html):
+    soup = BeautifulSoup(html,'lxml')
+    results=soup.select('#mainsrp-itemlist .items .item')
+    for result in results:
+        info={
+            'price':result.select('.price strong')[0].string,#价格
+            'deal-cnt':result.select('.deal-cnt')[0].string[:-3],#交易数量
+            'title':result.select('.title a')[0].get_text().strip(),#商品的标题
+            'shop':result.select('.shop a')[0].get_text().strip(),#商店名
+            'location':result.select('.location')[0].string,#地理位置
+            'img_url': result.select('.pic a img')[0].attrs['data-src']#图片链接
+        }
+        save_to_mongo(info)
+
+def next_page(page):
+    try:
+        inputs = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR,'div.form > input')))
+        button = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR,'div.form > span.btn.J_Submit')))
+        inputs.clear()
+        inputs.send_keys(page)
+        button.click()
+        wait.until(EC.text_to_be_present_in_element((By.CSS_SELECTOR,'.items li.item.active'),str(page)))
+        get_information(browser.page_source)
+    except TimeoutException:
+        print('next_page()出现TimeoutException')
+        next_page(page)
+
+def main():
+    pages=get_search()
+    try:
+        for page in range(2,pages+1):
+            next_page(page)
+    except Exception:
+        print('出现异常：',str(Exception))
+    finally:
+        browser.close()
+
+if __name__=='__main__':
+    main()
