@@ -1,0 +1,90 @@
+import requests
+from bs4 import BeautifulSoup
+import re 
+import pymongo
+from tomorrow import threads
+import time
+
+
+
+
+
+
+
+
+
+# @threads(100)
+
+def save_to_mongo(info):
+#     if db[MONGO_TABLE].update({'公司名':info['公司名']},{'$set':info},True):
+    if db[MONGO_TABLE].insert(info):
+        print('保存成功',info)
+        
+    else:
+        print('保存失败', info)
+
+
+    
+def get_page(url):   
+    
+
+    url = 'https://search.51job.com/list/030800,000000,0000,00,9,99,'+Keywork+',2,1.html?'  
+    headers = {
+           'Set-Cookie': 'nsearch=jobarea%3D%26%7C%26ord_field%3D%26%7C%26recentSearch0%3D%26%7C%26recentSearch1%3D%26%7C%26recentSearch2%3D%26%7C%26recentSearch3%3D%26%7C%26recentSearch4%3D%26%7C%26collapse_expansion%3D; expires=Wed, 11-Sep-2019 08:15:56 GMT; path=/; domain=.51job.com; httponly',
+           'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.99 Safari/537.36'}
+    response = requests.get(url, headers=headers,timeout = 10)
+    response.encoding = 'gb18030'
+    html = response.text
+
+    soup = BeautifulSoup(html,'lxml')
+    p_in = soup.select('.dw_page .p_in .td')[0].text
+    pages = re.findall('.*?(\d+)',p_in,re.S)[0]
+#     print(pages)
+    return pages
+
+
+
+
+
+def save_info(url):
+#     try:
+            headers = {
+               'Set-Cookie': 'nsearch=jobarea%3D%26%7C%26ord_field%3D%26%7C%26recentSearch0%3D%26%7C%26recentSearch1%3D%26%7C%26recentSearch2%3D%26%7C%26recentSearch3%3D%26%7C%26recentSearch4%3D%26%7C%26collapse_expansion%3D; expires=Wed, 11-Sep-2019 08:15:56 GMT; path=/; domain=.51job.com; httponly',
+               'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.99 Safari/537.36'}
+            response = requests.get(url, headers=headers,timeout = 10)
+            response.encoding = 'gb18030'
+            html = response.text
+
+            soup = BeautifulSoup(html,'lxml')
+            results = soup.select('#resultList .el')
+
+            for result in results:
+                info ={
+                    '职位名':result.select('.t1')[0].text.strip(),
+                    '公司名':result.select('.t2')[0].text,
+                    '工作地点':result.select('.t3')[0].text,
+                    '薪资':result.select('.t4')[0].text,
+                    '发布时间' :result.select('.t5')[0].text,
+
+                }
+                save_to_mongo(info)#保存到数据库
+    #             print(info)
+#     except ConnectTimeout:
+#         pass
+    
+if __name__ == '__main__':
+    Keywork = 'python'
+    
+    MONGO_URL='localhost'
+    MONGO_DB='前程无忧'
+    MONGO_TABLE=Keywork
+
+    client = pymongo.MongoClient(MONGO_URL)#连接数据库
+    db = client[MONGO_DB]#创建数据库
+    
+    pages = get_page(Keywork)#4
+    for page in range(1,int(pages)+1):
+        url = 'https://search.51job.com/list/030800,000000,0000,00,9,99,'+Keywork+',2,'+str(page)+'.html?'
+        save_info(url)
+#         print(url)
+        time.sleep(3)
