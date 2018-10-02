@@ -1,0 +1,190 @@
+Django 拿不到数据的情况
+
+1. 直接用Model.objects.get() 可能有异常: Model.DoesNotExist, MultipleObjectsReturned
+2. 直接用Model.objects.filter()，拿不到时返回空，不会有异常
+3. get_object_or_404，则可能有Http404异常，或者MultipleObjectsReturned异常
+4. get_list_or_404，则拿不到数据时有Http404异常
+
+
+
+HTML表单form中，action属性是一个URL，这个URL是处理表单请求的URL，如果没有指定，默认就是当前的URL。form的method属性用于指定提交表单所使用的HTTP方法，一般使用的方式是get或者post。
+
+通过get方法提交表单时，表单数据附加在url后面，形式是 http://example.com/process/?a=1&b=2
+通过get方法提交表单时，表单数据在标准输入中。
+
+一般的使用规则是这样：当提交表单是要改变服务端的状态时，使用post方法，当只需要从服务器获取数据时，使用get方法。
+
+
+
+在模板中，可以通过 {% for %} 循环的forloop.counter 来获取当次迭代的次数，次数字从1开始；如果需要获取从0开始的次数，可以使用forloop.counter0。
+
+{% for choice in question.choice_set.all %}
+    <input type="radio" name="choice" id="choice{{ forloop.counter }}" value="{{ choice.id }}" />
+    <label for="choice{{ forloop.counter }}">{{ choice.choice_text }}</label><br />
+{% endfor %}
+
+
+详情可查看 django.template.defaulttags.do_for 的文档。
+
+
+
+
+当时用POST形式的表单时，需要考虑“跨域请求欺骗”攻击的潜在威胁。“跨域请求欺骗”通过伪造表单数据，然后向服务器发送有恶意的请求，达到在用户不知请的情况下，以合法的身份发送数据的目的。Django包含了简单的组件，可以抵御这样的攻击。只需要在所有指向内部URL的form里面使用Django的模板标签 {% csrf_token %}
+
+客户端通过表单传给服务器的数据，可以通过request.GET, request.POST来获取，这两个对象都是类似字典的对象，通过这些对象可以访问客户端提交上来的数据。
+
+
+
+在view函数中从url的名字反推出url地址
+
+在view函数中可以通过django.urls.reverse 函数来计算出某个URL地址，避免硬编码URL，功能类似模板中的 {% url ... %} 标签。
+
+有以下url配置
+
+    项目里的 urls.py
+    url(r'^polls/', include('polls.urls'))
+
+    polls应用里的urls.py
+    url(r'^(?P<question_id>[0-9]+)/vote/$', views.vote, name='vote')
+
+运行函数
+
+    reverse('vote', args=(123,))
+
+将会返回
+
+    /polls/123/vote/
+
+
+
+重定向页面到指定的url
+
+重定向页面操作可以手动实现，也可以通过return一个HttpResponseRedirect对象来实现。
+
+范例：
+
+    url = '/polls/1/results/'
+    return HttpResponseRedirect(url)
+
+
+
+
+表单使用的一般流程：
+
+1. 用户向服务器发出请求(GET)
+2. 服务器收到客户端请求后，判断请求的方法 (GET)，然后回复一个包含了表单的页面
+3. 用户填写了表单，点击提交按钮，向服务器发送数据(POST)
+4. 服务器收到了用户发来的数据，判断请求的方法 (POST)，开始处理，处理完毕后转向另外一个页面；
+   如果处理过程中有错误发生，服务器就回复包含了表单的页面，并提供旧的数据和错误信息，
+   让用户可以重新提交表单
+
+
+
+
+
+表单验证
+
+
+Django的表单自带了不同类型的表单项，有EmailField, IntegerField, CharField, FloatField等，适应不同场景的使用。Django表单不同的表单项内置了特定的验证逻辑，可在使用表单数据之前做有效性验证。
+
+除了使用表单项本身的校验代码做一些常规的基本校验之外，还可以根据需要定制校验代码。
+
+
+设置表单项的属性值：
+
+    常用的定制属性：
+        required
+        widget
+        label
+        initial
+        error_messages
+        validators
+
+自定义校验方法
+
+def port_validator(value):
+    raise ValidationError('invalid value')
+
+
+
+
+
+Django对一个表单的验证分为几个步骤，各个步骤都可以做定制：
+
+1. Field的 to_python() 方法被执行，表单中的数据被按照定义做类型转换，转换失败就抛出ValidationError异常。
+2. Field的validate() 方法被执行，此方法接受上一步生成的值，但不返回任何值，也不修改传给它的值，这个方法可以抛出ValidationError异常。
+3. Field的run_validators()运行field的所有validator，并收集错误信息。这个方法不需要覆盖和定制。
+4. Field的clean方法运行to_python(), validate(), 和run_validators，它会返回处理后的数据，就是cleaned_data。
+5. Form的clean_<fieldname>()方法。
+
+
+
+自定义表单验证
+
+
+验证单个字段方法一：
+
+1. 自定义验证函数，验证失败时抛出异常 django.core.exceptions.ValidationError
+
+    def cellphone_validator(value):
+        if len(value) != 11:
+            raise ValidationError('电话号码必须是11位数')
+        if not value.isdigit():
+            raise ValidationError('电话号码必须是纯数字')
+
+2. 在表单类的定义里，给需要使用自定义校验函数的表单项设定validators属性
+
+    class UserForm(forms.Form):
+        ...
+        cell = forms.CharField(validators=[cellphone_validator])
+        ...
+
+验证单个字段方法二：
+
+在表单类的定义里，定义名为clean_XXX 的方法，XXX就是字段的名字，
+如果验证失败，就抛出ValidationError异常，否则就返回字段的值。
+
+    class UserForm(forms.Form):
+        ...
+        cell = forms.CharField()
+        ...
+
+        def clean_cellphone(self):
+            cellphone = self.cleaned_data['cellphone']
+            if len(cellphone) != 11:
+                raise ValidationError('电话号码必须是11位数')
+            if not cellphone.isdigit():
+                raise ValidationError('电话号码必须是纯数字')
+            return cellphone
+
+
+验证互相依赖的多个字段的方法：
+
+在表单类的定义里，定义名为clean 的方法，如果验证失败，就用form.add_error
+添加错误信息（相应的表单数据会被自动删除），否则就返回整个表单的数据(cleaned_data)
+
+    class UserForm(forms.Form):
+        ...
+        ...
+
+        def clean(self):
+            data = self.cleaned_data
+            if data['password'] != data['password2']:
+                self.add_error('password', 'not match')
+            return data
+
+
+
+
+学习Git
+
+
+1. 码云上的学系资料:
+
+    https://gitee.com/all-about-git
+
+    参考其中的 "七、Git 常用命令"
+
+2. Git使用简易指南
+
+    http://www.bootcss.com/p/git-guide/

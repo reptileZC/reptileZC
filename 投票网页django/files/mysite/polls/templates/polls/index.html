@@ -1,0 +1,13 @@
+<html>
+<head>
+<meta charset="utf-8">
+<title>Qustion List</title>
+</head>
+<body>
+<ul>
+{% for q in questions %}
+  <li><a href="{% url "polls:detail" q.pk %}">{{ q.question_text }}</a></li>
+{% endfor %}
+</ul>
+</body>
+</html>

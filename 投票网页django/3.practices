@@ -1,0 +1,334 @@
+一、书写一个表单，按以下要求测试：
+
+1. 不指定action属性，通过浏览器调试器查看实际的action值
+2. 不指定method属性，通过浏览器调试器查看实际的method值
+
+
+二、用模板输出一个列表中的值，并把每个值的位置信息一并输出
+
+1. 使用forloop.counter
+2. 使用forloop.counter0
+
+
+三、使用POST方法实现一个表单
+
+要求：
+1. 实现一个登录表单，成功就输出Login OK，否则就给出错误信息Login failed，并重新显示登录表单
+2. 在模板中加上{% csrf_token %} 以解决服务器的错误
+
+    <form method="post">
+    {% csrf_token %}
+    Name: <input name="username">
+    Password: <input type="password" name="password">
+    <input type="submit" value="OK">
+    </form>
+
+3. 不使用{% csrf_token %}，而是使用csrf_exempt 来解决服务器的错误
+
+    from django.views.decorators.csrf import csrf_exempt
+    @csrf_exempt
+    def login(request):
+        context = {}
+        if request.method == 'POST':
+            username = request.POST.get('username', '')
+            password = request.POST.get('password', '')
+            username_in_db = 'alice'
+            password_in_db = 'abc'
+            if username == username_in_db and password == password_in_db:
+                return HttpResponse('login OK')
+            else:
+                context['error'] = 'login failed'
+        return render(request, "polls/login.html", context)
+
+参考表单HTML代码：
+
+    {% if error %}
+    <div style="color: red">{{ error }}</div>
+    {% endif %}
+
+    <form method="post">
+    {% csrf_token %}
+    Name: <input name="username">
+    Password: <input type="password" name="password">
+    <input type="submit" value="OK">
+    </form>
+
+
+
+四、用POST方法设计一个表单，并在处理完表单请求后重定向到另外一个页面
+
+要求：
+1. 用reverse来获取新的URL地址
+    next_url = reverse('polls:index')
+2. 用HttpResponseRedirect来重定向
+    return HttpResponseRedirect(next_url)
+
+
+
+五、写一个表单
+
+要求：
+
+1. 包含字段 username, password, age, cell
+2. 当用户直接在浏览器地址栏输入地址访问时，显示表单
+3. 当用户点击提交按钮时，处理表单数据，如果处理成功，
+   就输出所有的表单数据，否则就让用户重新提交。
+
+范例form代码：
+
+class UserForm(forms.Form):
+    username = forms.CharField(max_length=5)
+    password = forms.CharField()
+    age = forms.CharField()
+    cell = forms.CharField()
+
+
+范例view代码：
+
+def signup(request):
+    if request.method == 'POST':
+        form = UserForm(request.POST)
+        if form.is_valid():
+            print(form.cleaned_data)
+            return HttpResponse('successfully signed up.')
+    else:
+        form = UserForm()
+    return render(request, "polls/signup.html", context={'form': form})
+
+
+
+六、操练表单自带的验证
+
+承接练习五，做修改，表单按照以下代码修改：
+
+class UserForm(forms.Form):
+    username = forms.CharField(max_length=8)
+    password = forms.CharField(min_length=16)
+    age = forms.IntergerField()
+    cell = forms.CharField()
+
+1. 在浏览器输入一些无效的值，观察浏览器的反映
+
+2. 在交互式的python环境，用requests库提交表单
+
+    1. 临时关闭项目的csrf中间件（生产环境不应该关闭，这里仅作为实验室测试目的）
+    2. 用requests.post提交一些无效的表单数据，用浏览器观察返回的结果
+
+    辅助测试函数:
+
+        def check(r):
+            open('/tmp/debug.html', 'w').write(r.text)
+            os.system('firefox file:///tmp/debug.html')
+
+    范例代码：
+
+        import os
+        import requests
+
+        r = requests.post('http://localhost:8000/polls/signup/', data={
+                'username': 'alicexxxxx',
+                'password': 'abc',
+                'age': '18',
+                'cell': '18612345678'}
+                )
+
+        check(r)
+
+
+
+七、承接上例，将表单项与其错误信息拆分开
+
+范例代码：
+
+<form method="post">
+  {% csrf_token %}
+  <p>Name: {{ form.username }}<span class="err">{{ form.username.errors }}</span></p>
+  <p>Password: {{ form.password }}<span class="err">{{ form.password.errors }}</span></p>
+  <p>Age: {{ form.age }}<span class="err">{{ form.age.errors }}</span></p>
+  <p>Cell: {{ form.cell }}<span class="err">{{ form.cell.errors }}</span></p>
+  <input type="submit" value="注册">
+</form>
+
+
+
+八、解决错误信息的问题
+
+写一个模板的“标签”，用来获取表单错误信息的第一个元素
+
+参考流程：
+
+1. 在应用的目录下创建一个名叫templatetags 的目录
+2. 在目录templatetags下面创建一个名叫mytags.py的文件
+
+3. 在mytags.py文件中添加类似下面的代码：
+
+    from django import template
+    register = template.Library()
+    @register.simple_tag
+    def errmsg(errlist):
+        if errlist:
+            return errlist[0]
+        else:
+            return ''
+
+4. 在模板中使用自定义的模板标签errmsg
+
+    1. 加载自定义的模板标签
+        {% load mytags %}
+    2. 使用标签
+        {% errmsg form.username.errors %}
+
+
+
+九、自定义表单项的校验函数
+
+参考流程
+
+1. 在应用的forms.py文件中，定义校验函数
+
+    def cellphone_validator(value):
+        if len(value) != 11:
+            raise ValidationError('电话号码必须是11位数')
+        if not value.isdigit():
+            raise ValidationError('电话号码必须是纯数字')
+
+2. 修改表单类的定义，给需要使用自定义校验函数的表单项设定validators属性
+
+    class UserForm(forms.Form):
+        username = forms.CharField(max_length=5)
+        password = forms.CharField()
+        email = forms.EmailField()
+        age = forms.IntegerField()
+        cell = forms.CharField(validators=[cellphone_validator])
+
+
+
+十、实现一个用户注册表单
+
+要求：
+1. 收集用户名和密码
+2. 先对表单做校验，再往下处理
+3. 存放到数据库中的密码需要用sha1sum来转换
+4. 如果用户已经存在，就在标准输出打出 "user exists"
+5. 如果注册成功就转向index页面
+6. 不要在view中硬编码url
+
+参考步骤：
+
+1. 定义模型
+
+    class User(models.Model):
+        username = models.CharField(max_length=20)
+        password = models.CharField(max_length=40)
+        time = models.DateTimeField(auto_now_add=True)
+
+2. 定义表单类
+
+    class SignupForm(forms.Form):
+        username = forms.CharField(max_length=20)
+        password = forms.CharField(max_length=32, min_length=3,
+                                   label="Password",
+                                   widget=forms.PasswordInput())
+        password2 = forms.CharField(max_length=32, min_length=3,
+                                    label="Repeat password",
+                                    widget=forms.PasswordInput())
+
+        def clean_username(self):
+            """ 检查用户名是否存在 """
+            username = self.cleaned_data['username']
+            if User.objects.filter(username=username).count():
+                # 用户存在
+                raise ValidationError('user exists')
+            else:
+                # 用户不存在
+                return username
+
+        def clean_password(self):
+            """ 检查密码的强度 """
+            password = self.cleaned_data['password']
+            # 校验密码的强度，校验标准：
+            # 1. 包含数字: re.search(r'\d', password)
+            # 2. 包含大写字母: re.search(r'[a-z]', password)
+            # 3. 包含小写字母: re.search(r'[a-z]', password)
+            # 4. 包含标点符号: re.search('[' + string.punctuation + ']', password))
+            if (not re.search(r'\d', password) or
+                    not re.search(r'[A-Z]', password) or
+                    not re.search(r'[a-z]', password) or
+                    not re.search('[' + string.punctuation + ']', password)):
+                raise ValidationError('password too simple')
+            else:
+                return password
+
+        def clean(self):
+            """ 检查两次输入的密码是否匹配 """
+            data = self.cleaned_data
+            password = data.get('password', '')
+            password2 = data.get('password2', '')
+            if password and password != password2:
+                self.add_error('password', 'not match')
+            return data
+
+3. 定义view函数
+
+    def signup(request):
+        if request.method == 'POST':
+            form = SignupForm(request.POST)
+            if form.is_valid():
+                username = form.cleaned_data['username']
+                password = form.cleaned_data['password']
+                password_sha1 = hashlib.sha1(password.encode()).hexdigest()
+                User.objects.create(username=username, password=password_sha1)
+                return HttpResponseRedirect(reverse('polls:index'))
+        else:
+            form = SignupForm()
+        return render(request, "polls/signup.html", {'form': form})
+
+
+十一、实现一个用户登录表单
+
+要求：
+1. 用户需要提供用户名和密码
+2. 先对表单做校验，再往下处理
+3. 如果在数据库中存在一个用户，其名字和密码与用户提交上来的信息相符合，就是登录成功
+4. 如果登录成功，就转向index页面
+5. 不要在view中硬编码url
+
+
+十二、给polls程序添加搜索功能
+
+要求：
+
+1. 访问地址 /polls/search/ 的时候显示一个表单
+2. 表单使用GET方法提交，提交给同一个url（自己）
+3. 根据表单中的kw输入框的值，搜索问题的文本部分 (Question.question_text)
+4. 搜索结果仿照index.html 的方式列出来
+5. 如果找不到任何匹配的记录，就输出"Nothing found"
+6. 如果kw为空，就不要做搜索动作
+
+
+
+项目部分
+
+1. 修改Question的detail页面的模板
+    1. 在页面显示问题的文本
+    2. 显示一个表单，用于用户提交投票
+    3. 表单提交给名叫vote的view函数，使用post方式
+    4. 表单中包含“跨站伪造请求”防御标签
+    5. 表单中显示问题的所有Choice，提供radio按钮让用户点击
+
+2. 实现view函数vote
+    1. 如果获取不到指定的Question，应该返回404错误
+    2. 如果用户选择的Choice不存在，或者没有选择任何Choice，
+       则返回错误信息，并重新显示表单让用户选择
+    3. 如果用户的选择是有效的，就更新Choice记录的votes属性，
+       并把用户重定向到Question的results页面，不应在view中
+       硬编码results的url
+
+3. 实现view函数results
+    1. 如果Question的id不存在，返回404错误
+
+4. 书写results的模板文件results.html
+    1. 显示Question的文本
+    2. 显示Question所关联的Choice的文本，及每个Choice的投票数
+    3. 如果投票数是1, 应显示单数，否则应显示复数
+    4. results页面底部提供一个链接，指向投票页面(detail页面)

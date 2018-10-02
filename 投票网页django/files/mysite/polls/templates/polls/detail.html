@@ -1,0 +1,22 @@
+<html>
+<head>
+<meta charset="utf-8">
+<title>Detail: {{ q.question_text }}</title>
+</head>
+<body>
+
+<p>{{ q.question_text }}</p>
+{% if error %}
+<p>{{ error }}</p>
+{% endif %}
+<form method="post" action="{% url "polls:vote" q.pk %}">
+{% csrf_token %}
+{% for c in q.choice_set.all %}
+<input type="radio" name="choice" id="choice{{ c.pk }}" value={{ c.pk }}><label for="choice{{ c.pk }}">{{ c.choice_text }}</label><br>
+{% endfor %}
+<br>
+<input type="submit" value="OK">
+</form>
+
+</body>
+</html>
