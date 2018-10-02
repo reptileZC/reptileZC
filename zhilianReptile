@@ -1,0 +1,52 @@
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+import re
+from bs4 import BeautifulSoup
+import pymongo
+from selenium.common.exceptions import TimeoutException
+
+KEYWORD='web'
+browser = webdriver.Chrome()
+wait = WebDriverWait(browser,10)
+
+
+url = 'https://sou.zhaopin.com/?p=1&pageSize=60&jl=779&kw=web&kt=3'
+browser.get(url)
+
+
+def serach_start():
+    html = browser.page_source
+    get_info(html)
+    for i in range(5):
+        next_page()
+        html = browser.page_source
+        get_info(html)
+        print(browser.current_url)
+        
+    
+    
+def next_page():
+    next = wait.until(EC.element_to_be_clickable((By.XPATH,'//*[@id="pagination_content"]/div/button[2]')))
+    next.click()
+    
+def get_info(html):
+    soup = BeautifulSoup(html,'lxml')
+    results=soup.select('#listContent .listItemBox-wrapper.clearfix')
+    for result in results:
+        i=0
+        info={
+            'Name':result.select('.job_title')[0].attrs['title'],#价格
+            'Company':result.select('.company_title')[0].attrs['title'],#交易数量
+            'Saray':result.select('.job_saray')[0].string,#商品的标题
+            'Experience':result.select('.job_demand .demand_item')[1].string,
+            'Education': result.select('.job_demand .demand_item')[2].string,
+        }
+        
+        print(info)
+   
+        
+if __name__ == '__main__':
+    serach_start()
+        
