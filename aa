@@ -1,0 +1,96 @@
+import requests
+import time
+import re
+from urllib.request import quote
+import threading
+from multiprocessing.dummy import Pool as  TheradPool
+
+SessionId = 'mcZjY7eF6lWF6LRFweLvXYbgMpi0PmSZntm/*h3*ntm-*VCmhwGaz'
+cookie = 'JSESSIONID=A690E07B91A4554CA4481008B7920F64.tc101; webact=%7B%22l_vdays%22%3A-1%2C%22l_visit%22%3A0%2C%22session%22%3A1543200324391%2C%22l_search%22%3A%22%22%2C%22l_dtype%22%3A%22%22%2C%22l_page%22%3A%22%22%2C%22counter%22%3A0%2C%22pv%22%3A0%2C%22f_visit%22%3A1543200324391%2C%22version%22%3A%22w172.1%22%7D; mbox=PC#7d98cafcddae4c379b2b6c04044014b2.22_23#1544578739|check#true#1543369199|session#ea22efa62e4c437c89cecd19353c6dcd#1543370999; s_sess=%20c16%3Dflash%2520not%2520detected%257C%3B%20c22%3DExternal%2520Websites%3B%20v0%3DExternal%2520Websites%257Cwww.baidu.com%3B%20c24%3DExternal%2520Websites%257Cwww.baidu.com%3B%20c6%3Din%3B%20c40%3Ddid%2520not%2520bounce%3B%20s_ppv_x%3D%3B%20s_ppv%3D93%257C19%3B%20s_cc%3Dtrue%3B%20s_sq%3D%3B; SPRING_SECURITY_REMEMBER_ME_COOKIE=a09oeGRDRGxlMlZDdUcySk9oRXhzdz09OjlsRCsxbS9ocUVEVmNYTnN1aUhvN3c9PQ; DDC_SPRING_SECURITY_REMEMBER_ME_COOKIE=.; DWRSESSIONID=mcZjY7eF6lWF6LRFweLvXYbgMpi0PmSZntm'
+
+title_list = ['owner']
+sub_industries = ['1010100', '1010200', '1010300', '1010500', '1019900', '1020100', '1020200', '1020300', '1020400',
+                  '1020500', '1020600', '1020700', '1020800', '1020900', '1021000', '1029900', '1030100', '1030200',
+                  '1030300', '1030400', '1030500', '1030600', '1030700', '1030800', '1030900', '1031000', '1039900',
+                  '1050100', '1050200', '1050300', '1050400', '1050500', '1050600', '1059900', '1060100', '1060200',
+                  '1060300', '1060400', '1060500', '1060600', '1069900', '1070100', '1070200', '1070300', '1070400',
+                  '1070500', '1070600', '1070700', '1070800', '1070900', '1079900', '1090100', '1090200', '1090300',
+                  '1090400', '1099900', '1100100', '1100200', '1100300', '1100400', '1100500', '1100600', '1100700',
+                  '1100800', '1100900', '1101000', '1101100', '1109900', '1110100', '1110200', '1110300', '1110400',
+                  '1110500', '1110600', '1110700', '1110800', '1110900', '1111000', '1111100', '1111200', '1111300',
+                  '1111400', '1111500', '1119900', '1120100', '1120200', '1120300', '1120400', '1120500', '1120600',
+                  '1129900', '1130100', '1130200', '1130300', '1130400', '1130500', '1130600', '1139900', '1140100',
+                  '1140200', '1140300', '1140400', '1140500', '1140600', '1149900', '1160100', '1160200', '1160300',
+                  '1160400', '1160500', '1160600', '1160700', '1160800', '1160900', '1161000', '1161100', '1161200',
+                  '1161300', '1161400', '1169900', '1180100', '1180200', '1180300', '1180400', '1189900', '1190100',
+                  '1190200', '1190300', '1190400', '1190500', '1199900', '1200100', '1200200', '1200300', '1200400',
+                  '1200500', '1200600', '1200700', '1209900', '1210100', '1210200', '1210300', '1210400', '1210500',
+                  '1210600', '1210700', '1210800', '1210900', '1211000', '1211100', '1211200', '1219900', '1220100',
+                  '1220200', '1220300', '1220400', '1220500', '1220600', '1220700', '1220800', '1220900', '1229900',
+                  '1230100', '1230200', '1230300', '1230400', '1230500', '1230600', '1239900', '1249900']
+
+for title in title_list:
+
+    for sub in sub_industries:
+
+
+        for i in range(1,251):
+            canshu = '{"filters":{"titles":["' + title + '"],"subIndustries":["' + sub + '"],"active":"industries"},"actionsOnColumns":{"companyName":{"sort":"asc"}},"currentPage":' + str(
+                i) + ',"totalRecordsOnPage":200}'
+            text = quote(canshu)
+            payload = {
+
+                'callCount': '1',
+                'nextReverseAjaxIndex': '0',
+                'c0-scriptName': 'SearchDWR',
+                'c0-methodName': 'findContacts',
+                'c0-id': '0',
+                'c0-param0': 'string:' + text,
+                'batchId': '1',
+                'instanceId': '0',
+                'page': '%2Fsearch',
+                'scriptSessionId': SessionId
+            }
+
+            headers = {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.102 Safari/537.36',
+                'Cookie': cookie,
+            }
+
+            url = 'https://connect.data.com/dwr/call/plaincall/SearchDWR.findCompanies.dwr'
+            try:
+                res = requests.post(url, data=payload, headers=headers)
+                page = re.findall('totalCount:(\d+)',res.text)
+                sh = re.findall(',resultList:(.*?)]',res.text)
+                if len(sh[0]) == 1:
+                    print('第一个_____'+'退出' +'______'+ title+'______'+str(i))
+                    print('第一个_____' + title + '____' + sub + '______' + str(i) + '______' + page[0] + '__________')
+                    print('*' * 30)
+                    break
+                else:
+                    # print(res.text)
+                    ret = re.findall('resultList:(.*?)],totalCount:', res.text)
+                    results = ret[0].rsplit('}')
+                    for result in results[:-1]:
+                        with open('1.txt','a+') as f:
+                            f.writelines(result+'\n')
+                    print('第一个_____' + title + '____' + sub + '______' + str(i) + '______' + page[0] + '__________')
+                    print('*' * 30)
+            except:
+                res = requests.post(url, data=payload, headers=headers)
+                page = re.findall('totalCount:(\d+)', res.text)
+                sh = re.findall(',resultList:(.*?)]', res.text)
+                if len(sh[0]) == 1:
+                    print('第一个_____' + '退出' + '______' + title + '______' + str(i))
+                    print('第一个_____' + title + '____' + sub + '______' + str(i) + '______' + page[0] + '__________')
+                    print('*' * 30)
+                    break
+                else:
+                    # print(res.text)
+                    ret = re.findall('resultList:(.*?)],totalCount:', res.text)
+                    results = ret[0].rsplit('}')
+                    for result in results[:-1]:
+                        with open('1.txt', 'a+') as f:
+                            f.writelines(result + '\n')
+                    print('第一个_____' + title + '____' + sub + '______' + str(i) + '______' + page[0] + '__________')
+                    print('*' * 30)
