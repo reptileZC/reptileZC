@@ -1,0 +1,48 @@
+import re
+import pandas as pd
+# ,{acquired:null,city:"Fort Worth",company:"Buffalo Ranch Reproduction Lab",companyGuid:"vpy352GuSZeJN2Gx-hRO_w",companyId:4344339,country:"United States",directDial:true,guid:"sVdtSOtHXIvckXu0KT9KWw",id:69043379,inactive:false,name:"McGlothlin, Brett",owned:false,royaltyAcquired:null,state:"TX",title:"Resident Trainer",updated:"11\/12\/14"
+
+info ={
+'acquired':[],
+'city':[],
+'company':[],
+'companyGuid':[],
+'companyId':[],
+'country':[],
+'directdial':[],
+'guid':[],
+'id':[],
+'inactive':[],
+'name':[],
+'state':[],
+'title':[],
+}
+with open('qqqqqq.txt','r') as b:
+    # print(len(b.readlines()))
+    for i in b.readlines():
+        # host = i.replace('\n','')
+        s = 'acquired:(.*?),city:"(.*?)",company:"(.*?)",companyGuid:"(.*?)",companyId:(\d+),country:"(.*?)",directDial:(.*?),guid:"(.*?)",id:(\d+),inactive:(.*?),name:"(.*?)",owned:.*?,royaltyAcquired:.*?,state:"(.*?)",title:"(.*?)",updated:".*?"'
+        restiles = re.findall(s,i)
+        print(restiles)
+        for restile in restiles:
+            info['acquired'].append(restile[0])
+            info['city'].append(restile[1])
+            info['company'].append(restile[2])
+            info['companyGuid'].append(restile[3])
+            info['companyId'].append(restile[4])
+            info['country'].append(restile[5])
+            info['directdial'].append(restile[6])
+            info['guid'].append(restile[7])
+            info['id'].append(restile[8])
+            info['inactive'].append(restile[9])
+            info['name'].append(restile[10])
+            info['state'].append(restile[11])
+            info['title'].append(restile[12])
+
+
+
+#
+
+
+df = pd.DataFrame(info)
+df.to_csv('tt.csv', encoding='gb18030')
