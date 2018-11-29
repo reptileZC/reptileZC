@@ -19,7 +19,7 @@ conn = requests.session()
 
 def token():
 
-
+        try:
             url = 'https://connect.data.com/registration/signup'
             res = conn.get(url)
             cook = res.cookies.get_dict()['JSESSIONID']
@@ -28,169 +28,180 @@ def token():
 
             ssh = re.findall('input type="hidden" name="CSRF_TOKEN" id="CSRF_TOKEN" value="(.*?)"/></form>', res.text)
             return str(ssh[0])
-
+        except:
+            token()
 
 
 
 def name():
 
+    try:
+        date = {
+            'callCount': '1',
+            'nextReverseAjaxIndex': '0',
+            'c0-scriptName': 'OpenFieldValidatorDWR',
+            'c0-methodName': 'validateField',
+            'c0-id': '0',
+            'c0-param0': 'string:userFullName',
+            'c0-param1': 'string:'+quote('Jason+tom'),
+            'c0-param2': 'array:[]',
+            'batchId': '1',
+            'instanceId': '0',
+            'page': '%2Fregistration%2Fsignup',
+            'scriptSessionId': 'dH46rjGTPvNBZcKHOU1HWwjlWHccGaBXotm'
+
+        }
+
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:63.0) Gecko/20100101 Firefox/63.0'
+
+        }
+
+        url = 'https://connect.data.com/dwr/call/plaincall/OpenFieldValidatorDWR.validateField.dwr'
+        res = conn.post(url, data=date, headers=headers)
 
 
-    date = {
-        'callCount': '1',
-        'nextReverseAjaxIndex': '0',
-        'c0-scriptName': 'OpenFieldValidatorDWR',
-        'c0-methodName': 'validateField',
-        'c0-id': '0',
-        'c0-param0': 'string:userFullName',
-        'c0-param1': 'string:'+quote('Jason+tom'),
-        'c0-param2': 'array:[]',
-        'batchId': '1',
-        'instanceId': '0',
-        'page': '%2Fregistration%2Fsignup',
-        'scriptSessionId': 'dH46rjGTPvNBZcKHOU1HWwjlWHccGaBXotm'
-
-    }
-
-    headers = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:63.0) Gecko/20100101 Firefox/63.0'
-
-    }
-
-    url = 'https://connect.data.com/dwr/call/plaincall/OpenFieldValidatorDWR.validateField.dwr'
-    res = conn.post(url, data=date, headers=headers)
-
-
-    print('2name______'+str(res.status_code))
-
+        print('2name______'+str(res.status_code))
+    except:
+        name()
 
 def email(user_email):
 
-    date = {
-        'callCount': '1',
-        'nextReverseAjaxIndex': '0',
-        'c0-scriptName': 'OpenFieldValidatorDWR',
-        'c0-methodName': 'validateField',
-        'c0-id': '0',
-        'c0-param0': 'string:userEmail',
-        'c0-param1': 'string:'+quote(user_email),
-        'c0-param2': 'array:[]',
-        'batchId': '1',
-        'instanceId': '0',
-        'page': '%2Fregistration%2Fsignup',
-        'scriptSessionId': 'dH46rjGTPvNBZcKHOU1HWwjlWHccGaBXotm'
+    try:
+        date = {
+            'callCount': '1',
+            'nextReverseAjaxIndex': '0',
+            'c0-scriptName': 'OpenFieldValidatorDWR',
+            'c0-methodName': 'validateField',
+            'c0-id': '0',
+            'c0-param0': 'string:userEmail',
+            'c0-param1': 'string:'+quote(user_email),
+            'c0-param2': 'array:[]',
+            'batchId': '1',
+            'instanceId': '0',
+            'page': '%2Fregistration%2Fsignup',
+            'scriptSessionId': 'dH46rjGTPvNBZcKHOU1HWwjlWHccGaBXotm'
 
-    }
+        }
 
-    headers = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:63.0) Gecko/20100101 Firefox/63.0'
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:63.0) Gecko/20100101 Firefox/63.0'
 
-    }
+        }
 
-    url = 'https://connect.data.com/dwr/call/plaincall/OpenFieldValidatorDWR.validateField.dwr'
-    res = conn.post(url, data=date, headers=headers)
+        url = 'https://connect.data.com/dwr/call/plaincall/OpenFieldValidatorDWR.validateField.dwr'
+        res = conn.post(url, data=date, headers=headers)
 
 
-    print('3email_____'+str(res.status_code))
+        print('3email_____'+str(res.status_code))
+    except:
+        email(user_email)
 
 
 
 def conemail(user_email):
 
-    date = {
-        'callCount': '1',
-        'nextReverseAjaxIndex': '0',
-        'c0-scriptName': 'OpenFieldValidatorDWR',
-        'c0-methodName': 'validateField',
-        'c0-id': '0',
-        'c0-param0': 'string:userConfirmEmail',
-        'c0-param1': 'string:'+quote(user_email),
-        'c0-param2': 'array:[]',
-        'batchId': '1',
-        'instanceId': '0',
-        'page': '%2Fregistration%2Fsignup',
-        'scriptSessionId': 'dH46rjGTPvNBZcKHOU1HWwjlWHccGaBXotm'
+    try:
+        date = {
+            'callCount': '1',
+            'nextReverseAjaxIndex': '0',
+            'c0-scriptName': 'OpenFieldValidatorDWR',
+            'c0-methodName': 'validateField',
+            'c0-id': '0',
+            'c0-param0': 'string:userConfirmEmail',
+            'c0-param1': 'string:'+quote(user_email),
+            'c0-param2': 'array:[]',
+            'batchId': '1',
+            'instanceId': '0',
+            'page': '%2Fregistration%2Fsignup',
+            'scriptSessionId': 'dH46rjGTPvNBZcKHOU1HWwjlWHccGaBXotm'
 
-    }
+        }
 
-    headers = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:63.0) Gecko/20100101 Firefox/63.0'
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:63.0) Gecko/20100101 Firefox/63.0'
 
-    }
+        }
 
-    url = 'https://connect.data.com/dwr/call/plaincall/OpenFieldValidatorDWR.validateField.dwr'
-    res = conn.post(url, data=date, headers=headers)
+        url = 'https://connect.data.com/dwr/call/plaincall/OpenFieldValidatorDWR.validateField.dwr'
+        res = conn.post(url, data=date, headers=headers)
 
 
-    print('4conemail_____'+str(res.status_code))
-
+        print('4conemail_____'+str(res.status_code))
+    except:
+        conemail(user_email)
 
 
 
 def password(user_passwd):
 
+    try:
+        date = {
+            'callCount': '1',
+            'nextReverseAjaxIndex': '0',
+            'c0-scriptName': 'OpenFieldValidatorDWR',
+            'c0-methodName': 'validateField',
+            'c0-id': '0',
+            'c0-param0': 'string:password',
+            'c0-param1': 'string:'+user_passwd,
+            'c0-param2': 'array:[]',
+            'batchId': '0',
+            'instanceId': '0',
+            'page': '%2Fregistration%2Fsignup',
+            'scriptSessionId': 'dH46rjGTPvNBZcKHOU1HWwjlWHccGaBXotm'
 
-    date = {
-        'callCount': '1',
-        'nextReverseAjaxIndex': '0',
-        'c0-scriptName': 'OpenFieldValidatorDWR',
-        'c0-methodName': 'validateField',
-        'c0-id': '0',
-        'c0-param0': 'string:password',
-        'c0-param1': 'string:'+user_passwd,
-        'c0-param2': 'array:[]',
-        'batchId': '0',
-        'instanceId': '0',
-        'page': '%2Fregistration%2Fsignup',
-        'scriptSessionId': 'dH46rjGTPvNBZcKHOU1HWwjlWHccGaBXotm'
+        }
 
-    }
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:63.0) Gecko/20100101 Firefox/63.0'
 
-    headers = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:63.0) Gecko/20100101 Firefox/63.0'
+        }
 
-    }
+        url = 'https://connect.data.com/dwr/call/plaincall/OpenFieldValidatorDWR.validateField.dwr'
+        res = conn.post(url, data=date, headers=headers)
 
-    url = 'https://connect.data.com/dwr/call/plaincall/OpenFieldValidatorDWR.validateField.dwr'
-    res = conn.post(url, data=date, headers=headers)
-
-    print('1password_____' + str(res.status_code))
-    pwd = re.findall('value:"(.*?)"', res.text)
-    # print(res.text)
-    # print(pwd[0])
-    return str(pwd[0])
-
+        print('1password_____' + str(res.status_code))
+        pwd = re.findall('value:"(.*?)"', res.text)
+        # print(res.text)
+        # print(pwd[0])
+        return str(pwd[0])
+    except:
+        password(user_passwd)
 
 
 def profession():
 
-    date = {
-'callCount': '1',
-'nextReverseAjaxIndex': '0',
-'c0-scriptName': 'OpenFieldValidatorDWR',
-'c0-methodName': 'validateField',
-'c0-id': '0',
-'c0-param0': 'string:userProfession',
-'c0-param1': 'string:2',
-'c0-param2': 'array:[]',
-'batchId': '1',
-'instanceId': '0',
-'page': '%2Fregistration%2Fsignup',
-'scriptSessionId': 'dH46rjGTPvNBZcKHOU1HWwjlWHccGaBXotm'
-
-    }
-
-    headers = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:63.0) Gecko/20100101 Firefox/63.0'
-
-    }
-
-    url = 'https://connect.data.com/dwr/call/plaincall/OpenFieldValidatorDWR.validateField.dwr'
-    res = conn.post(url, data=date, headers=headers)
 
 
-    print('5profession_____'+str(res.status_code))
+    try:
+        date = {
+    'callCount': '1',
+    'nextReverseAjaxIndex': '0',
+    'c0-scriptName': 'OpenFieldValidatorDWR',
+    'c0-methodName': 'validateField',
+    'c0-id': '0',
+    'c0-param0': 'string:userProfession',
+    'c0-param1': 'string:2',
+    'c0-param2': 'array:[]',
+    'batchId': '1',
+    'instanceId': '0',
+    'page': '%2Fregistration%2Fsignup',
+    'scriptSessionId': 'dH46rjGTPvNBZcKHOU1HWwjlWHccGaBXotm'
 
+        }
+
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:63.0) Gecko/20100101 Firefox/63.0'
+
+        }
+
+        url = 'https://connect.data.com/dwr/call/plaincall/OpenFieldValidatorDWR.validateField.dwr'
+        res = conn.post(url, data=date, headers=headers)
+
+
+        print('5profession_____'+str(res.status_code))
+    except:
+        profession()
 
 
 
@@ -231,44 +242,50 @@ def mishi():
 
 def sunmit(user_email, user_passwd):
 
-    pwd1 = password(user_passwd)
-    token1 = token()
-    name()
-    email(user_email)
+    try:
+        pwd1 = password(user_passwd)
+        token1 = token()
+        name()
+        email(user_email)
 
-    conemail(user_email)
-    profession()
-    mishi1 = mishi()
-    # mishi1 = '123'
-    date = {
+        conemail(user_email)
+        profession()
+        mishi1 = mishi()
+        # mishi1 = '123'
+        date = {
 
-            'contactGuid':'',
-            'companyGuid':'',
-            'userFullName':'Jason tom',
-            'userEmail':user_email,
-            'userConfirmEmail':user_email,
-            'password':pwd1,
-            'userProfession':'1',
-            'g-recaptcha-response':mishi1,
-            'specialOffers':'true',
-            '_specialOffers':'on',
-            'CSRF_TOKEN':token1,
+                'contactGuid':'',
+                'companyGuid':'',
+                'userFullName':'Jason tom',
+                'userEmail':user_email,
+                'userConfirmEmail':user_email,
+                'password':pwd1,
+                'userProfession':'1',
+                'g-recaptcha-response':mishi1,
+                'specialOffers':'true',
+                '_specialOffers':'on',
+                'CSRF_TOKEN':token1,
 
-    }
+        }
 
-    headers = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:63.0) Gecko/20100101 Firefox/63.0'
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:63.0) Gecko/20100101 Firefox/63.0'
 
-    }
+        }
 
-    url = 'https://connect.data.com/registration/submit'
-    res = conn.post(url, data=date, headers=headers)
-
-
-    # print('submit_____200'+str(res.status_code))
-    # print(res.text)
-    print(date)
-    print('注册成功')
+        url = 'https://connect.data.com/registration/submit'
+        res = conn.post(url, data=date, headers=headers)
+        time.sleep(5)
+        login = conn.get('https://connect.data.com/login?&continue=%2Fnonlogged.login')
+        #
+        #
+        # print('7login_____200'+str(login.status_code))
+        print(res.text)
+        # print(login.text)
+        print(date)
+        # print('注册成功')
+    except:
+        sunmit(user_email, user_passwd)
 
 
 
@@ -280,9 +297,8 @@ def email_yanzheng(user_email_name):
 
     time.sleep(5)
     try:
-
-        home_email = requests.get(
-            'http://www.fakemailgenerator.com/inbox/cuvox.de/' + user_email_name + '/')  # 邮件主页link
+        url = 'http://www.fakemailgenerator.com/inbox/cuvox.de/' + user_email_name + '/'
+        home_email = requests.get(url )  # 邮件主页link
         soup = BeautifulSoup(home_email.text, 'lxml')
         results = soup.select('#email-list li a ')[-1]
         print(results)
