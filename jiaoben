@@ -1,0 +1,325 @@
+import requests
+import re
+import time
+from bs4 import BeautifulSoup
+import asyncio
+from python3_anticaptcha import NoCaptchaTaskProxyless
+from python3_anticaptcha import NoCaptchaTask
+import logging
+from urllib.request import quote
+import json
+import random
+
+
+
+
+conn = requests.session()
+
+
+
+def token():
+
+
+            url = 'https://connect.data.com/registration/signup'
+            res = conn.get(url)
+            cook = res.cookies.get_dict()['JSESSIONID']
+            # print(res.cookies.get_dict()['JSESSIONID'])
+
+
+            ssh = re.findall('input type="hidden" name="CSRF_TOKEN" id="CSRF_TOKEN" value="(.*?)"/></form>', res.text)
+            return str(ssh[0])
+
+
+
+
+def name():
+
+
+
+    date = {
+        'callCount': '1',
+        'nextReverseAjaxIndex': '0',
+        'c0-scriptName': 'OpenFieldValidatorDWR',
+        'c0-methodName': 'validateField',
+        'c0-id': '0',
+        'c0-param0': 'string:userFullName',
+        'c0-param1': 'string:'+quote('Jason+tom'),
+        'c0-param2': 'array:[]',
+        'batchId': '1',
+        'instanceId': '0',
+        'page': '%2Fregistration%2Fsignup',
+        'scriptSessionId': 'dH46rjGTPvNBZcKHOU1HWwjlWHccGaBXotm'
+
+    }
+
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:63.0) Gecko/20100101 Firefox/63.0'
+
+    }
+
+    url = 'https://connect.data.com/dwr/call/plaincall/OpenFieldValidatorDWR.validateField.dwr'
+    res = conn.post(url, data=date, headers=headers)
+
+
+    print('2name______'+str(res.status_code))
+
+
+def email(user_email):
+
+    date = {
+        'callCount': '1',
+        'nextReverseAjaxIndex': '0',
+        'c0-scriptName': 'OpenFieldValidatorDWR',
+        'c0-methodName': 'validateField',
+        'c0-id': '0',
+        'c0-param0': 'string:userEmail',
+        'c0-param1': 'string:'+quote(user_email),
+        'c0-param2': 'array:[]',
+        'batchId': '1',
+        'instanceId': '0',
+        'page': '%2Fregistration%2Fsignup',
+        'scriptSessionId': 'dH46rjGTPvNBZcKHOU1HWwjlWHccGaBXotm'
+
+    }
+
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:63.0) Gecko/20100101 Firefox/63.0'
+
+    }
+
+    url = 'https://connect.data.com/dwr/call/plaincall/OpenFieldValidatorDWR.validateField.dwr'
+    res = conn.post(url, data=date, headers=headers)
+
+
+    print('3email_____'+str(res.status_code))
+
+
+
+def conemail(user_email):
+
+    date = {
+        'callCount': '1',
+        'nextReverseAjaxIndex': '0',
+        'c0-scriptName': 'OpenFieldValidatorDWR',
+        'c0-methodName': 'validateField',
+        'c0-id': '0',
+        'c0-param0': 'string:userConfirmEmail',
+        'c0-param1': 'string:'+quote(user_email),
+        'c0-param2': 'array:[]',
+        'batchId': '1',
+        'instanceId': '0',
+        'page': '%2Fregistration%2Fsignup',
+        'scriptSessionId': 'dH46rjGTPvNBZcKHOU1HWwjlWHccGaBXotm'
+
+    }
+
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:63.0) Gecko/20100101 Firefox/63.0'
+
+    }
+
+    url = 'https://connect.data.com/dwr/call/plaincall/OpenFieldValidatorDWR.validateField.dwr'
+    res = conn.post(url, data=date, headers=headers)
+
+
+    print('4conemail_____'+str(res.status_code))
+
+
+
+
+def password(user_passwd):
+
+
+    date = {
+        'callCount': '1',
+        'nextReverseAjaxIndex': '0',
+        'c0-scriptName': 'OpenFieldValidatorDWR',
+        'c0-methodName': 'validateField',
+        'c0-id': '0',
+        'c0-param0': 'string:password',
+        'c0-param1': 'string:'+user_passwd,
+        'c0-param2': 'array:[]',
+        'batchId': '0',
+        'instanceId': '0',
+        'page': '%2Fregistration%2Fsignup',
+        'scriptSessionId': 'dH46rjGTPvNBZcKHOU1HWwjlWHccGaBXotm'
+
+    }
+
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:63.0) Gecko/20100101 Firefox/63.0'
+
+    }
+
+    url = 'https://connect.data.com/dwr/call/plaincall/OpenFieldValidatorDWR.validateField.dwr'
+    res = conn.post(url, data=date, headers=headers)
+
+    print('1password_____' + str(res.status_code))
+    pwd = re.findall('value:"(.*?)"', res.text)
+    # print(res.text)
+    # print(pwd[0])
+    return str(pwd[0])
+
+
+
+def profession():
+
+    date = {
+'callCount': '1',
+'nextReverseAjaxIndex': '0',
+'c0-scriptName': 'OpenFieldValidatorDWR',
+'c0-methodName': 'validateField',
+'c0-id': '0',
+'c0-param0': 'string:userProfession',
+'c0-param1': 'string:2',
+'c0-param2': 'array:[]',
+'batchId': '1',
+'instanceId': '0',
+'page': '%2Fregistration%2Fsignup',
+'scriptSessionId': 'dH46rjGTPvNBZcKHOU1HWwjlWHccGaBXotm'
+
+    }
+
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:63.0) Gecko/20100101 Firefox/63.0'
+
+    }
+
+    url = 'https://connect.data.com/dwr/call/plaincall/OpenFieldValidatorDWR.validateField.dwr'
+    res = conn.post(url, data=date, headers=headers)
+
+
+    print('5profession_____'+str(res.status_code))
+
+
+
+
+
+
+def mishi():
+
+
+
+        ANTICAPTCHA_KEY = "eb50723e22643c7264a7ee7e6b0edada"#正常的API
+        # ANTICAPTCHA_KEY ='873356c4a8d12e3dc4e11f1c85237a82'#没余额测试的API
+        SITE_KEY = '6LctzkcUAAAAAOIAi2apSmRQc3-k7aFZvcZpwQ91'
+        PAGE_URL = 'https://connect.data.com/registration/signup'
+        try:
+            user_answer = NoCaptchaTaskProxyless.NoCaptchaTaskProxyless(anticaptcha_key = ANTICAPTCHA_KEY).captcha_handler(websiteURL=PAGE_URL,websiteKey=SITE_KEY)
+            print(user_answer)
+            try:
+
+                mishi = user_answer['solution']['gRecaptchaResponse']
+                print('6mishi_____获得密匙\n' + mishi)
+                return str(mishi)
+
+            except:
+                if user_answer['errorDescription'] =='Account has zero or negative balance':
+                    print('帐户余额为零或为负数,已退出程序！')
+                    exit()
+
+        except KeyError:
+
+            print('没空闲人')
+            mishi()
+
+
+
+
+
+
+
+def sunmit(user_email, user_passwd):
+
+    pwd1 = password(user_passwd)
+    token1 = token()
+    name()
+    email(user_email)
+
+    conemail(user_email)
+    profession()
+    mishi1 = mishi()
+    # mishi1 = '123'
+    date = {
+
+            'contactGuid':'',
+            'companyGuid':'',
+            'userFullName':'Jason tom',
+            'userEmail':user_email,
+            'userConfirmEmail':user_email,
+            'password':pwd1,
+            'userProfession':'1',
+            'g-recaptcha-response':mishi1,
+            'specialOffers':'true',
+            '_specialOffers':'on',
+            'CSRF_TOKEN':token1,
+
+    }
+
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:63.0) Gecko/20100101 Firefox/63.0'
+
+    }
+
+    url = 'https://connect.data.com/registration/submit'
+    res = conn.post(url, data=date, headers=headers)
+
+
+    # print('submit_____200'+str(res.status_code))
+    # print(res.text)
+    print(date)
+    print('注册成功')
+
+
+
+
+
+
+def email_yanzheng(user_email_name):
+
+
+    time.sleep(5)
+    try:
+
+        home_email = requests.get(
+            'http://www.fakemailgenerator.com/inbox/cuvox.de/' + user_email_name + '/')  # 邮件主页link
+        soup = BeautifulSoup(home_email.text, 'lxml')
+        results = soup.select('#email-list li a ')[-1]
+        print(results)
+        email_link = re.findall('/cuvox.de/.*?/(.*?)">', str(results))[0]
+        print(email_link)
+
+        url = 'http://www.fakemailgenerator.com/email/cuvox.de/asdcefdvcsv/' + email_link
+        bb = requests.get(url)  # 邮件内容link
+        yanzheng_link = re.findall('<a href="(.*?)".*?ACTIVATE YOUR ACCOUNT ›</strong>', bb.text)
+        print(yanzheng_link[0])
+
+        data_ljnk = requests.get(yanzheng_link[0])  # 邮件验证link
+        # print(data_ljnk.text)
+        print(data_ljnk.status_code)
+        print('验证成功')
+
+    except:
+        print('重来邮件验证')
+        email_yanzheng(user_email_name)
+
+
+
+
+
+def main():
+
+    for i in range(1):
+        userName = ''.join(random.sample("1234567890abcdefghijklmnopqrstuvwxyz", 10))
+        user_email_name = userName
+        user_email = user_email_name+'@cuvox.de'
+        print(user_email)
+        user_passwd = 'Lzy1221123'
+        sunmit(user_email,user_passwd)
+        email_yanzheng(user_email_name)
+        with open('email.txt','a+') as f:
+            f.writelines(user_email+'\n')
+
+
+if __name__ == '__main__':
+    main()
