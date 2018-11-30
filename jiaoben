@@ -1,217 +1,366 @@
-# import requests
-# import re
-#
-#
-# def passwd():
-#
-# 	date = {
-# 	'callCount':'1',
-# 	'nextReverseAjaxIndex':'0',
-# 	'c0-scriptName':'OpenFieldValidatorDWR',
-# 	'c0-methodName':'validateField',
-# 	'c0-id':'0',
-# 	'c0-param0':'string:password',
-# 	'c0-param1':'string:Lzy1221123',
-# 	'c0-param2':'array:[]',
-# 	'batchId':'0',
-# 	'instanceId':'0',
-# 	'page':'%2Fregistration%2Fsubmit',
-# 	'scriptSessionId':'A3QJ7bK1PbYiR42FPikQtulBM7SUAveQjtm/MPZzitm-797XSKlCl'
-#
-# 	}
-#
-#
-# 	headers={
-# 	'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:63.0) Gecko/20100101 Firefox/63.0'
-#
-#
-# 	}
-#
-# 	url  = 'https://connect.data.com/dwr/call/plaincall/OpenFieldValidatorDWR.validateField.dwr'
-# 	res = requests.post(url,data=date,headers =headers)
-#
-#
-# 	# print(res.text)
-# 	sh  = re.findall('value:"(.*?)"',res.text)
-# 	return sh[0]
-#
-# print(passwd())
-#passowrd加密
-# _____________________________________________________________________________________________________________
-
-
-#
-#
-# import time
-# import asyncio
-# import requests
-#
-# from python3_anticaptcha import NoCaptchaTaskProxyless
-# from python3_anticaptcha import NoCaptchaTask
-#
-# ANTICAPTCHA_KEY = "da0fa1138155afa8e5cf3f33d538c8f6"
-# SITE_KEY = '6LctzkcUAAAAAOIAi2apSmRQc3-k7aFZvcZpwQ91'
-# PAGE_URL = 'https://connect.data.com/registration/signup'
-#
-#
-#
-#
-#
-# async def run():
-# 	try:
-# 		result = await NoCaptchaTaskProxyless.aioNoCaptchaTaskProxyless(anticaptcha_key=ANTICAPTCHA_KEY) \
-# 										.captcha_handler(websiteURL=PAGE_URL,
-# 														 websiteKey=SITE_KEY)
-# 		print(result)
-# 	except Exception as err:
-# 		print(err)
-#
-#
-# if __name__ == '__main__':
-#
-#
-# 	loop = asyncio.get_event_loop()
-# 	loop.run_until_complete(run())
-# 	loop.close()
-
-#密匙
-#__________________________________________________________________
-
 import requests
 import re
 import time
+from bs4 import BeautifulSoup
 import asyncio
 from python3_anticaptcha import NoCaptchaTaskProxyless
 from python3_anticaptcha import NoCaptchaTask
 import logging
 from urllib.request import quote
+import json
+import random
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+import threading
+from multiprocessing.dummy import Pool as  TheradPool
 
 
+#
 
-
-ANTICAPTCHA_KEY = "eb50723e22643c7264a7ee7e6b0edada"
-SITE_KEY = '6LctzkcUAAAAAOIAi2apSmRQc3-k7aFZvcZpwQ91'
-PAGE_URL = 'https://connect.data.com/registration/signup'
-mishi = ''
-logging.captureWarnings(True)
-s=requests.session()
-
-
-def passwd():
-
-
-	date = {
-	'callCount':'1',
-	'nextReverseAjaxIndex':'0',
-	'c0-scriptName':'OpenFieldValidatorDWR',
-	'c0-methodName':'validateField',
-	'c0-id':'0',
-	'c0-param0':'string:password',
-	'c0-param1':'string:Lzy1221123',
-	'c0-param2':'array:[]',
-	'batchId':'0',
-	'instanceId':'0',
-	'page':'%2Fregistration%2Fsubmit',
-	'scriptSessionId':'pVPhT2~VYwx2tW2LEbf8!Jb6KlnPLRL9otm/k57Rmtm-yTfUEv*za'
-
-	}
-
-
-	headers={
-	'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:63.0) Gecko/20100101 Firefox/63.0'
-
-
-	}
-
-	url  = 'https://connect.data.com/dwr/call/plaincall/OpenFieldValidatorDWR.validateField.dwr'
-	res = s.post(url,data=date,headers =headers,verify=False)
-
-
-	# print(res.text)
-	sh  = re.findall('value:"(.*?)"',res.text)
-	return sh[0]
-
-
-
+# options = webdriver.FirefoxOptions()
+# options.add_argument('-headless')
+# browser = webdriver.Firefox(options=options)
+# # browser = webdriver.Chrome()
+options = webdriver.FirefoxOptions()
+options.add_argument('-headless')
+browser = webdriver.Firefox(options=options)
+conn = requests.session()
 
 def token():
 
 
-	url = 'https://connect.data.com/registration/signup'
-	res = requests.get(url,verify=False)
-	ssh = re.findall('input type="hidden" name="CSRF_TOKEN" id="CSRF_TOKEN" value="(.*?)"/></form>', res.text)
-
-	return ssh[0]
-
+            url = 'https://connect.data.com/registration/signup'
+            res = conn.get(url)
+            # cook = res.cookies.get_dict()['JSESSIONID']
+            # print(res.cookies.get_dict()['JSESSIONID'])
 
 
-
-
-async def run():
-	try:
-		global mishi
-		result = await NoCaptchaTaskProxyless.aioNoCaptchaTaskProxyless(anticaptcha_key=ANTICAPTCHA_KEY) \
-										.captcha_handler(websiteURL=PAGE_URL,
-														 websiteKey=SITE_KEY)
-		mishi = result['solution']['gRecaptchaResponse']
-		print(mishi)
-		print(result)
-
-	except Exception as err:
-		print(err)
-
-def mishi():
-
-	user_answer = NoCaptchaTaskProxyless.NoCaptchaTaskProxyless(anticaptcha_key = ANTICAPTCHA_KEY).captcha_handler(websiteURL=PAGE_URL,websiteKey=SITE_KEY)
-	return mishi
+            ssh = re.findall('input type="hidden" name="CSRF_TOKEN" id="CSRF_TOKEN" value="(.*?)"/></form>', res.text)
+            return str(ssh[0])
 
 
 
+
+def name():
+
+
+
+    date = {
+        'callCount': '1',
+        'nextReverseAjaxIndex': '0',
+        'c0-scriptName': 'OpenFieldValidatorDWR',
+        'c0-methodName': 'validateField',
+        'c0-id': '0',
+        'c0-param0': 'string:userFullName',
+        'c0-param1': 'string:'+quote('Jason+tom'),
+        'c0-param2': 'array:[]',
+        'batchId': '1',
+        'instanceId': '0',
+        'page': '%2Fregistration%2Fsignup',
+        'scriptSessionId': 'dH46rjGTPvNBZcKHOU1HWwjlWHccGaBXotm'
+
+    }
+
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:63.0) Gecko/20100101 Firefox/63.0'
+
+    }
+
+    url = 'https://connect.data.com/dwr/call/plaincall/OpenFieldValidatorDWR.validateField.dwr'
+    res = conn.post(url, data=date, headers=headers)
+
+
+    print('2name______'+str(res.status_code))
+
+
+def email(user_email):
+
+    date = {
+        'callCount': '1',
+        'nextReverseAjaxIndex': '0',
+        'c0-scriptName': 'OpenFieldValidatorDWR',
+        'c0-methodName': 'validateField',
+        'c0-id': '0',
+        'c0-param0': 'string:userEmail',
+        'c0-param1': 'string:'+quote(user_email),
+        'c0-param2': 'array:[]',
+        'batchId': '1',
+        'instanceId': '0',
+        'page': '%2Fregistration%2Fsignup',
+        'scriptSessionId': 'dH46rjGTPvNBZcKHOU1HWwjlWHccGaBXotm'
+
+    }
+
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:63.0) Gecko/20100101 Firefox/63.0'
+
+    }
+
+    url = 'https://connect.data.com/dwr/call/plaincall/OpenFieldValidatorDWR.validateField.dwr'
+    res = conn.post(url, data=date, headers=headers)
+
+
+    print('3email_____'+str(res.status_code))
+
+
+
+def conemail(user_email):
+
+    date = {
+        'callCount': '1',
+        'nextReverseAjaxIndex': '0',
+        'c0-scriptName': 'OpenFieldValidatorDWR',
+        'c0-methodName': 'validateField',
+        'c0-id': '0',
+        'c0-param0': 'string:userConfirmEmail',
+        'c0-param1': 'string:'+quote(user_email),
+        'c0-param2': 'array:[]',
+        'batchId': '1',
+        'instanceId': '0',
+        'page': '%2Fregistration%2Fsignup',
+        'scriptSessionId': 'dH46rjGTPvNBZcKHOU1HWwjlWHccGaBXotm'
+
+    }
+
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:63.0) Gecko/20100101 Firefox/63.0'
+
+    }
+
+    url = 'https://connect.data.com/dwr/call/plaincall/OpenFieldValidatorDWR.validateField.dwr'
+    res = conn.post(url, data=date, headers=headers)
+
+
+    print('4conemail_____'+str(res.status_code))
+
+
+
+
+def password(user_passwd):
+
+
+    date = {
+        'callCount': '1',
+        'nextReverseAjaxIndex': '0',
+        'c0-scriptName': 'OpenFieldValidatorDWR',
+        'c0-methodName': 'validateField',
+        'c0-id': '0',
+        'c0-param0': 'string:password',
+        'c0-param1': 'string:'+user_passwd,
+        'c0-param2': 'array:[]',
+        'batchId': '0',
+        'instanceId': '0',
+        'page': '%2Fregistration%2Fsignup',
+        'scriptSessionId': 'dH46rjGTPvNBZcKHOU1HWwjlWHccGaBXotm'
+
+    }
+
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:63.0) Gecko/20100101 Firefox/63.0'
+
+    }
+
+    url = 'https://connect.data.com/dwr/call/plaincall/OpenFieldValidatorDWR.validateField.dwr'
+    res = requests.post(url, data=date, headers=headers)
+
+    print('1password_____' + str(res.status_code))
+    pwd = re.findall('value:"(.*?)"', res.text)
+    # print(res.text)
+    # print(pwd[0])
+    return str(pwd[0])
+
+
+
+def profession():
+
+    date = {
+'callCount': '1',
+'nextReverseAjaxIndex': '0',
+'c0-scriptName': 'OpenFieldValidatorDWR',
+'c0-methodName': 'validateField',
+'c0-id': '0',
+'c0-param0': 'string:userProfession',
+'c0-param1': 'string:2',
+'c0-param2': 'array:[]',
+'batchId': '1',
+'instanceId': '0',
+'page': '%2Fregistration%2Fsignup',
+'scriptSessionId': 'dH46rjGTPvNBZcKHOU1HWwjlWHccGaBXotm'
+
+    }
+
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:63.0) Gecko/20100101 Firefox/63.0'
+
+    }
+
+    url = 'https://connect.data.com/dwr/call/plaincall/OpenFieldValidatorDWR.validateField.dwr'
+    res = conn.post(url, data=date, headers=headers)
+
+
+    print('5profession_____'+str(res.status_code))
+
+
+
+
+
+
+def solver():
+
+
+
+        ANTICAPTCHA_KEY = "eb50723e22643c7264a7ee7e6b0edada"#正常的API
+        # ANTICAPTCHA_KEY ='873356c4a8d12e3dc4e11f1c85237a82'#没余额测试的API
+        SITE_KEY = '6LctzkcUAAAAAOIAi2apSmRQc3-k7aFZvcZpwQ91'
+        PAGE_URL = 'https://connect.data.com/registration/signup'
+
+        user_answer = NoCaptchaTaskProxyless.NoCaptchaTaskProxyless(anticaptcha_key = ANTICAPTCHA_KEY).captcha_handler(websiteURL=PAGE_URL,websiteKey=SITE_KEY)
+        print('密匙：' + str(user_answer))
+
+        try:
+
+            if  user_answer['errorId'] == 2:
+                print('没空闲人')
+                10/0
+
+            elif user_answer['errorId'] ==1:
+                print('帐户余额为零或为负数,已退出程序！')
+                10 / 0
+            elif user_answer['errorId'] == 0:
+                mishi = user_answer['solution']['gRecaptchaResponse']
+                print('6mishi_____获得密匙\n' + mishi)
+                return str(mishi)
+
+
+
+        except KeyError:
+
+            print('超时')
+            solver()
+
+
+
+
+
+
+
+def sunmit(user_email, user_passwd):
+
+
+    pwd1 = password(user_passwd)
+    token1 = token()
+    name()
+    email(user_email)
+
+    conemail(user_email)
+    profession()
+    mishi1 = solver()
+    professiop_num = random.randint(1, 4)
+    # mishi1 = '123'
+    date = {
+
+            'contactGuid':'',
+            'companyGuid':'',
+            'userFullName':'Jason tom',
+            'userEmail':user_email,
+            'userConfirmEmail':user_email,
+            'password':pwd1,
+            'userProfession':str(professiop_num),
+            'g-recaptcha-response':mishi1,
+            'specialOffers':'true',
+            '_specialOffers':'on',
+            'CSRF_TOKEN':token1,
+
+    }
+
+
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:63.0) Gecko/20100101 Firefox/63.0'
+
+    }
+
+    url = 'https://connect.data.com/registration/submit'
+
+    res = conn.post(url, data=date, headers=headers)
+    print(res.status_code)
+    time.sleep(1)
+    login = conn.get('https://connect.data.com/login?&continue=%2Fnonlogged.login')
+
+    #
+    #
+    # print('7login_____200'+str(login.status_code))
+    # print(res.text)
+    # print(login.text)
+    print('参数：'+str(date))
+    # print('注册成功')
+
+
+
+
+
+
+
+def email_yanzheng(user_email):
+
+
+    # options = webdriver.FirefoxOptions()
+    # options.add_argument('-headless')
+    # browser = webdriver.Firefox(options=options)
+    browser = webdriver.Firefox()
+    try:
+
+        browser.get('https://www.666email.com/#/' + user_email)
+        browser.refresh()
+        browser.get('https://www.666email.com/mail.php?unseen=3')
+        html = browser.page_source
+        # browser.close()
+        yanzheng_link = re.findall('<a href="(.*?)".*?ACTIVATE', html)
+        data_ljnk = requests.get(yanzheng_link[0])
+
+        if data_ljnk.status_code == 200:
+            print('激活成功')
+        print('ok')
+        browser.close()
+
+    except IndexError as indexerr:
+        browser.close()
+        print('错误' + str(indexerr))
+        email_yanzheng(user_email)
+
+
+
+
+
+def main():
+
+    # try:
+        for i in range(1):
+
+            userName = ''.join(random.sample("1234567890abcdefghijklmnopqrstuvwxyz", 10))
+            user_email_name = userName
+            user_email = user_email_name+'@666email.com'
+            print(user_email)
+            user_passwd = 'Lzy1221123'
+
+            sunmit(user_email,user_passwd)
+
+
+            email_yanzheng(user_email)
+
+            with open('email_a.txt','a+') as f:
+                f.writelines(user_email+'\n')
+    # except:
+    #     print('main（）出错了')
+    #     main()
 
 
 if __name__ == '__main__':
 
+    a=0
 
-
-	token1 = token()
-	passwd1 = passwd()
-	print(passwd1)
-	# loop = asyncio.get_event_loop()
-	# loop.run_until_complete(run())
-	# loop.close()
-	mishi1 = mishi()
-	username = quote('cocococzzw@666email.com')
-
-
-	date ={
-
-	'_specialOffers': 'on',
-	'companyGuid':'',
-	'contactGuid': '',
-	'CSRF_TOKEN': token1,
-	'g-recaptcha-response': mishi1,
-	'password': passwd1,
-	'specialOffers': 'true',
-	'userConfirmEmail': username,
-	'userEmail': username,
-	'userFullName': 'jam+tom',
-	'userProfession': '2',
-
-		}
-
-	headers = {
-		'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.102 Safari/537.36',
-	}
-
-	url = 'https://connect.data.com/registration/submit'
-
-
-
-	res = s.post(url,headers=headers)
-	print(res.text)
-
-
-	print(date)
-
-
+    for cishu in range(3):
+        a+=1
+        print('第'+str(a)+'个账号')
+        main()
+        print('*'*10)
 
