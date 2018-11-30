@@ -25,9 +25,7 @@ from multiprocessing.dummy import Pool as ThreadPool
 # options.add_argument('-headless')
 # browser = webdriver.Firefox(options=options)
 # # browser = webdriver.Chrome()
-options = webdriver.FirefoxOptions()
-options.add_argument('-headless')
-browser = webdriver.Firefox(options=options)
+
 conn = requests.session()
 
 def token():
@@ -307,27 +305,28 @@ def sunmit(user_email, user_passwd):
 def email_yanzheng(user_email):
 
 
-    # options = webdriver.FirefoxOptions()
-    # options.add_argument('-headless')
-    # browser = webdriver.Firefox(options=options)
-    browser = webdriver.Firefox()
+
+    # browser = webdriver.Firefox()
     try:
+        options = webdriver.FirefoxOptions()
+        options.add_argument('-headless')
+        browser = webdriver.Firefox(options=options)
+
 
         browser.get('https://www.666email.com/#/' + user_email)
         browser.refresh()
         browser.get('https://www.666email.com/mail.php?unseen=3')
         html = browser.page_source
-        # browser.close()
+        time.sleep(1)
+        browser.close()
         yanzheng_link = re.findall('<a href="(.*?)".*?ACTIVATE', html)
         data_ljnk = requests.get(yanzheng_link[0])
 
         if data_ljnk.status_code == 200:
             print('激活成功')
         print('ok')
-        browser.close()
 
     except IndexError as indexerr:
-        browser.close()
         print('错误' + str(indexerr))
         email_yanzheng(user_email)
 
