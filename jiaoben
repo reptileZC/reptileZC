@@ -9,11 +9,15 @@ import logging
 from urllib.request import quote
 import json
 import random
-
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
 
 
 
 conn = requests.session()
+chrome_options = Options()
+chrome_options.add_argument('--headless')
+browser = webdriver.Chrome(chrome_options=chrome_options,)
 
 
 
@@ -206,7 +210,7 @@ def mishi():
         PAGE_URL = 'https://connect.data.com/registration/signup'
         try:
             user_answer = NoCaptchaTaskProxyless.NoCaptchaTaskProxyless(anticaptcha_key = ANTICAPTCHA_KEY).captcha_handler(websiteURL=PAGE_URL,websiteKey=SITE_KEY)
-            print(user_answer)
+            print('密匙：'+str(user_answer))
             try:
 
                 mishi = user_answer['solution']['gRecaptchaResponse']
@@ -264,13 +268,16 @@ def sunmit(user_email, user_passwd):
     url = 'https://connect.data.com/registration/submit'
     res = conn.post(url, data=date, headers=headers)
     time.sleep(5)
-    login = conn.get('https://connect.data.com/login?&continue=%2Fnonlogged.login')
+    try:
+        login = conn.get('https://connect.data.com/login?&continue=%2Fnonlogged.login')
+    except:
+        login = conn.get('https://connect.data.com/login?&continue=%2Fnonlogged.login')
     #
     #
     # print('7login_____200'+str(login.status_code))
-    print(res.text)
+    # print(res.text)
     # print(login.text)
-    print(date)
+    print('参数：'+str(date))
     # print('注册成功')
 
 
@@ -283,27 +290,26 @@ def email_yanzheng(user_email_name):
 
 
     time.sleep(5)
-
     try:
-
-        home_url = 'http://www.mytrashmail.com/myTrashMail_inbox.aspx?email='+user_email_name
-        home_email = requests.get(home_url)  # 邮件主页link
-        results = re.findall("<b><a href='(.*?)'>", home_email.text)
+        url = 'http://www.fakemailgenerator.com/inbox/cuvox.de/' + user_email_name + '/'
+        home_email = requests.get(url )  # 邮件主页link
+        soup = BeautifulSoup(home_email.text, 'lxml')
+        results = soup.select('#email-list li a ')[-1]
         print(results)
-        # Table1 > tbody > tr:nth-child(2) > td:nth-child(4) > b > a
-        url = 'http://www.mytrashmail.com/' + results[0]
-        bb = requests.get(url)  # 邮件内容link
-        yanzheng_link = re.findall('<a href="(.*?)".*?ACTIVATE YOUR ACCOUNT', bb.text)
+        email_link = re.findall('/cuvox.de/.*?/(.*?)">', str(results))[0]
+        print(email_link)
 
+        url = 'http://www.fakemailgenerator.com/email/cuvox.de/asdcefdvcsv/' + email_link
+        bb = requests.get(url)  # 邮件内容link
+        yanzheng_link = re.findall('<a href="(.*?)".*?ACTIVATE YOUR ACCOUNT ›</strong>', bb.text)
         print(yanzheng_link[0])
 
         data_ljnk = requests.get(yanzheng_link[0])  # 邮件验证link
-        print(data_ljnk.text)
+        # print(data_ljnk.text)
         print(data_ljnk.status_code)
         print('验证成功')
 
     except:
-
         print('重来邮件验证')
         email_yanzheng(user_email_name)
 
@@ -316,11 +322,14 @@ def main():
     for i in range(1):
         userName = ''.join(random.sample("1234567890abcdefghijklmnopqrstuvwxyz", 10))
         user_email_name = userName
-        user_email = user_email_name+'@mt2015.com'
+        user_email = user_email_name+'@cuvox.de'
         print(user_email)
         user_passwd = 'Lzy1221123'
+        browser.get('http://www.fakemailgenerator.com/inbox/cuvox.de/' + user_email_name + '/')
+        # fake = conn.get(url = 'http://www.fakemailgenerator.com/inbox/cuvox.de/' + user_email_name + '/')
         sunmit(user_email,user_passwd)
         email_yanzheng(user_email_name)
+        browser.close()
         with open('email.txt','a+') as f:
             f.writelines(user_email+'\n')
 
